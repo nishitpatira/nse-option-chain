@@ -22,8 +22,7 @@ public class OptionDataRetriever {
 
 	private OptionDetails generateOptionDetailsPOJO(final Elements data, final Date expiryDate, final String symbol) {
 		try {
-			return OptionDetails.builder().symbol(symbol).currentDate(DataUtils.getCurrentDate())
-					.expiryDate(expiryDate)
+			return OptionDetails.builder().symbol(symbol).currentDate(DataUtils.getCurrentDate()).expiryDate(expiryDate)
 					.callOpenInterest(DataUtils.convertStringToInt(data.get(1).text()))
 					.callChangeInOpenInterest(DataUtils.convertStringToInt(data.get(2).text()))
 					.callVolume(DataUtils.convertStringToInt(data.get(3).text()))
@@ -53,21 +52,22 @@ public class OptionDataRetriever {
 	}
 
 	public List<OptionDetails> fetchData(final String url, final String symbol) {
-		List<OptionDetails> optionChain = new LinkedList<OptionDetails>();
+		final List<OptionDetails> optionChain = new LinkedList<OptionDetails>();
 		try {
-			Document doc = Jsoup.connect(url).get();
+			final Document doc = Jsoup.connect(url).timeout(0).get();
 			if (doc != null) {
-				Element optionTable = doc.getElementById("octable");
-				Elements optionTableBody = optionTable.getElementsByTag("tbody");
-				Element expiryDate = doc.getElementById("date");
+				final Element optionTable = doc.getElementById("octable");
+				final Elements optionTableBody = optionTable.getElementsByTag("tbody");
+				final Element expiryDate = doc.getElementById("date");
 
 				for (Element table : optionTableBody) {
-					Elements options = table.getElementsByTag("tr");
+					final Elements options = table.getElementsByTag("tr");
 
 					for (int i = 0; i < options.size() - 1; i++) {
-						Elements data = options.get(i).getElementsByTag("td");
-						OptionDetails optionDetails = generateOptionDetailsPOJO(data, DataUtils.getExpiryDate(expiryDate.getElementsByAttribute("selected").text()), symbol);
-						//System.out.println(optionDetails);
+						final Elements data = options.get(i).getElementsByTag("td");
+						final OptionDetails optionDetails = generateOptionDetailsPOJO(data,
+								DataUtils.getExpiryDate(expiryDate.getElementsByAttribute("selected").text()), symbol);
+						// System.out.println(optionDetails);
 						optionChain.add(optionDetails);
 					}
 				}
@@ -75,13 +75,15 @@ public class OptionDataRetriever {
 
 		} catch (IOException ioe) {
 			System.err.println("Error while connecting for URL : " + url);
+			System.err.println("Exception is : " + ioe);
 		}
 
 		return optionChain;
 	}
 
-	private List<Pair<String,String>> generateURL(final String symbol) {
-		List<Pair<String,String>> urls = new LinkedList<>();
+	private List<Pair<String, String>> generateURL(final String symbol) {
+		final List<Pair<String, String>> urls = new LinkedList<>();
+		// System.out.println(symbol);
 		for (String expiryDate : fetchExpiryDates(url, symbol)) {
 			if (!expiryDate.equals("Select")) {
 				StringBuilder firstURL = new StringBuilder(url);
@@ -98,27 +100,25 @@ public class OptionDataRetriever {
 	}
 
 	private List<String> fetchExpiryDates(final String url, final String symbol) {
+		final List<String> expiryDatesList = new LinkedList<>();
+		final StringBuilder urlBuilder = new StringBuilder(url);
+		urlBuilder.append("symbol=");
+		urlBuilder.append(symbol);
 		try {
-			StringBuilder urlBuilder = new StringBuilder(url);
-			urlBuilder.append("symbol=");
-			urlBuilder.append(symbol);
-			Document doc = Jsoup.connect(urlBuilder.toString()).get();
-			Element expiryDates = doc.getElementById("date");
-			List<String> expiryDatesList = new LinkedList<>();
+			final Document doc = Jsoup.connect(urlBuilder.toString()).timeout(0).get();
+			final Element expiryDates = doc.getElementById("date");
 			for (Element element : expiryDates.getElementsByTag("option")) {
 				expiryDatesList.add(element.text());
 			}
 			return expiryDatesList;
 		} catch (IOException ioe) {
-			System.err.println("Error while connecting to the URL : " + url);
+			System.err.println("Error while connecting to the URL : " + urlBuilder.toString() + ioe);
 		}
-
 		return null;
-
 	}
 
-	public List<Pair<String,String>> fetchDom() {
-		List<Pair<String, String>> urlSymbolList = new LinkedList<>();
+	public List<Pair<String, String>> fetchDom() {
+		final List<Pair<String, String>> urlSymbolList = new LinkedList<>();
 
 		for (String symbol : Constants.symbols) {
 			urlSymbolList.addAll(generateURL(symbol));
@@ -127,7 +127,5 @@ public class OptionDataRetriever {
 			System.out.println(pair.getUrl());
 		}
 		return urlSymbolList;
-
 	}
-
 }

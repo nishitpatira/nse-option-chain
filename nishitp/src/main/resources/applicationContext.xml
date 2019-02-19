@@ -37,6 +37,15 @@
 		<property name="dataSource" ref="localMySQLDataSource"></property>
 	</bean>
 
+	<bean id="awsMySQLDataSource"
+		class="org.springframework.jdbc.datasource.DriverManagerDataSource">
+		<property name="driverClassName" value="com.mysql.cj.jdbc.Driver" />
+		<property name="url"
+			value="jdbc:mysql://nse-option.c8w5f8pkggz7.ap-south-1.rds.amazonaws.com:3306/StocksData" />
+		<property name="username" value="nishitp" />
+		<property name="password" value="AP102711" />
+	</bean>
+
 	<bean id="localMySQLDataSource"
 		class="org.springframework.jdbc.datasource.DriverManagerDataSource">
 		<property name="driverClassName" value="com.mysql.cj.jdbc.Driver" />

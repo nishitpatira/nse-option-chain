@@ -16,7 +16,7 @@ public class Constants {
 		symbols.add("JSWSTEEL");
 		symbols.add("POWERGRID");
 		symbols.add("GAIL");
-		symbols.add("UPL");
+		//symbols.add("UPL");
 		symbols.add("HINDPETRO");
 		symbols.add("NTPC");
 		symbols.add("COALINDIA");
